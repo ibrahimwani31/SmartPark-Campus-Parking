@@ -6,17 +6,36 @@ TOTAL_SLOTS = 5
 parking_lot = {}
 
 
+
+
 def park_vehicle():
     vehicle = input("Enter vehicle registration number: ").strip().upper()
 
+    # Reject empty registration numbers
+    if not vehicle:
+        print("Error: Registration number cannot be empty.")
+        return
+
+    # Reject duplicate registration numbers
+    if vehicle in parking_lot:
+        print(f"Error: {vehicle} is already parked.")
+        return
+
+    # Check parking capacity
     if len(parking_lot) >= TOTAL_SLOTS:
         print("Parking lot is full.")
         return
 
-    slot = len(parking_lot) + 1
-    parking_lot[vehicle] = slot
+    # Assign the next available slot
+    occupied_slots = set(parking_lot.values())
 
-    print(f"Vehicle {vehicle} parked in slot {slot}.")
+    for slot in range(1, TOTAL_SLOTS + 1):
+        if slot not in occupied_slots:
+            parking_lot[vehicle] = slot
+            print(f"Vehicle {vehicle} parked in slot {slot}.")
+            return
+
+
 
 
 def display_vehicles():
