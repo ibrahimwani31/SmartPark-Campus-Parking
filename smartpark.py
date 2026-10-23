@@ -37,6 +37,15 @@ def park_vehicle():
 
 
 
+def display_vehicles():
+    print("\n--- Parked Vehicles ---")
+
+    if not parking_lot:
+        print("No vehicles are parked.")
+        return
+
+    for vehicle, slot in parking_lot.items():
+        print(f"Slot {slot}: {vehicle}")
 
 
 def main():
