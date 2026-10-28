@@ -62,6 +62,19 @@ def display_vehicles():
     ):
         print(f"Slot {slot}: {vehicle}")
 
+def search_vehicle():
+    vehicle = input(
+        "Enter vehicle registration number to search: "
+    ).strip().upper()
+
+    if not vehicle:
+        print("Error: Registration number cannot be empty.")
+        return
+
+    if vehicle in parking_lot:
+        print(f"Vehicle {vehicle} is parked in slot {parking_lot[vehicle]}.")
+    else:
+        print(f"Vehicle {vehicle} is not parked.")
 
 def main():
     while True:
@@ -69,7 +82,8 @@ def main():
         print("1. Park a vehicle")
         print("2. Remove a vehicle")
         print("3. Display parked vehicles")
-        print("4. Exit")
+        print("4. Search for a vehicle")
+        print("5. Exit")
 
         choice = input("Enter your choice: ").strip()
 
@@ -80,10 +94,12 @@ def main():
         elif choice == "3":
             display_vehicles()
         elif choice == "4":
+            search_vehicle()
+        elif choice == "5":
             print("Exiting SmartPark.")
             break
         else:
-            print("Invalid choice. Enter a number from 1 to 4.")
+            print("Invalid choice. Enter a number from 1 to 5.")
 
 
 if __name__ == "__main__":
