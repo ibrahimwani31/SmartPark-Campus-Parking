@@ -1,10 +1,18 @@
 
 # SmartPark - Campus Parking Management System
-# Version 2: Added vehicle validation and removal
 
-TOTAL_SLOTS = 5
+import math
+from datetime import datetime, timedelta
+
+TOTAL_SLOTS = 6
+RATE_PER_HOUR = 20
 parking_lot = {}
 
+def calculate_fee(entry_time, exit_time):
+    """Return (duration_hours, billed_hours, total_fee)."""
+    duration_hours = (exit_time - entry_time).total_seconds() / 3600
+    billed_hours = max(1, math.ceil(duration_hours))
+    return duration_hours, billed_hours, billed_hours * RATE_PER_HOUR
 
 def park_vehicle():
     vehicle = input(
@@ -23,17 +31,37 @@ def park_vehicle():
         print("Parking lot is full.")
         return
 
-    # Find the first available slot
-    occupied_slots = set(parking_lot.values())
+    # Find currently occupied slots
+    occupied_slots = {
+        details["slot"] for details in parking_lot.values()
+    }
 
+    # Find and assign the first available slot
     for slot in range(1, TOTAL_SLOTS + 1):
         if slot not in occupied_slots:
-            parking_lot[vehicle] = slot
+            parking_lot[vehicle] = {
+                "slot": slot,
+                "entry_time": datetime.now()
+            }
+
             print(f"Vehicle {vehicle} parked in slot {slot}.")
+
+            print(
+                "Entry time:",
+                parking_lot[vehicle]["entry_time"].strftime(
+                    "%I:%M:%S %p"
+                )
+            )
+
+            # Exit only after successfully parking the vehicle
             return
+
+    print("Error: No available parking slot found.")
 
 
 def remove_vehicle():
+    """Remove a vehicle and calculate its parking bill."""
+
     vehicle = input(
         "Enter vehicle registration number to remove: "
     ).strip().upper()
@@ -46,8 +74,32 @@ def remove_vehicle():
         print(f"Error: Vehicle {vehicle} is not parked.")
         return
 
-    slot = parking_lot.pop(vehicle)
-    print(f"Vehicle {vehicle} removed from slot {slot}.")
+    # Retrieve the vehicle's parking information
+    details = parking_lot[vehicle]
+    slot = details["slot"]
+    entry_time = details["entry_time"]
+
+       # Record the departure time and calculate the bill
+    exit_time = datetime.now()
+    duration_hours, billed_hours, total_fee = calculate_fee(entry_time, exit_time)
+    
+    # Display the parking receipt
+    print("\n========== SMARTPARK RECEIPT ==========")
+    print(f"Vehicle number : {vehicle}")
+    print(f"Parking slot   : {slot}")
+    print(f"Entry time     : {entry_time.strftime('%I:%M:%S %p')}")
+    print(f"Exit time      : {exit_time.strftime('%I:%M:%S %p')}")
+    print(f"Duration       : {duration_hours:.2f} hours")
+    print(f"Billable hours : {billed_hours}")
+    print(f"Rate per hour  : Rs. {RATE_PER_HOUR}")
+    print("---------------------------------------")
+    print(f"TOTAL FEE      : Rs. {total_fee}")
+    print("=======================================")
+
+    # Remove the vehicle after generating the receipt
+    parking_lot.pop(vehicle)
+
+    print(f"Vehicle removed from slot {slot}.")
 
 
 def display_vehicles():
@@ -57,11 +109,18 @@ def display_vehicles():
         print("No vehicles are parked.")
         return
 
-    for vehicle, slot in sorted(
-        parking_lot.items(), key=lambda item: item[1]
+    for vehicle, details in sorted(
+        parking_lot.items(),
+        key=lambda item: item[1]["slot"]
     ):
-        print(f"Slot {slot}: {vehicle}")
+        slot = details["slot"]
+        entry_time = details["entry_time"]
 
+        print(f"Slot {slot}: {vehicle}")
+        print(
+            "Entry time:",
+            entry_time.strftime("%I:%M:%S %p")
+        )
 def search_vehicle():
     vehicle = input(
         "Enter vehicle registration number to search: "
@@ -72,9 +131,21 @@ def search_vehicle():
         return
 
     if vehicle in parking_lot:
-        print(f"Vehicle {vehicle} is parked in slot {parking_lot[vehicle]}.")
+        details = parking_lot[vehicle]
+
+        slot = details["slot"]
+        entry_time = details["entry_time"]
+
+        print(f"Vehicle: {vehicle}")
+        print(f"Parking slot: {slot}")
+        print(
+            "Entry time:",
+            entry_time.strftime("%I:%M:%S %p")
+        )
     else:
         print(f"Vehicle {vehicle} is not parked.")
+
+
 
 def main():
     while True:
